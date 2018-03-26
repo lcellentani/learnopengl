@@ -42,4 +42,4 @@ Release/
 *.exp
 
 !media/**
-!/3rdparty/sdl/lib/**
+!/3rdparty/glfw/lib/**

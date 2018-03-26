@@ -4,7 +4,7 @@ project (learnopengl VERSION 0.1 LANGUAGES CXX)
 set (TARGET_NAME "learnopengl")
 
 set(CMAKE_SUPPRESS_REGENERATION true)
-# explicitely specify which configurations we want
+# explicitly specify which configurations we want
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
 # make all binary artifacts end up on the same place
@@ -65,7 +65,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_FLAGS "/W4 /WX /GR- /Gy 
 
 if(WIN32) # Check if we are on Windows
 	if(MSVC) # Check if we are using the Visual Studio compiler
-		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE /NODEFAULTLIB:\"msvcrt\"" )
 	elseif(CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mwindows") # Not tested
 	else()
