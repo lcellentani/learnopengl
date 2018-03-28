@@ -1,7 +1,5 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <iostream>
+#include "CommonDefine.h"
+#include "GraphicsTypes.h"
 
 void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -10,7 +8,7 @@ void processInput(GLFWwindow *window) {
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	(void)window;
+	TINYNGINE_UNUSED(window);
 	glViewport(0, 0, width, height);
 }
 
