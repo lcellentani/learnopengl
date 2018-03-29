@@ -32,3 +32,15 @@ namespace tinyngine { namespace detail {
 #define TINYNGINE_COUNTOF(arr) sizeof(arr) / sizeof(arr[0])
 #endif
 
+static const uint32_t cInvalidHandle = UINT32_MAX;
+
+struct ResourceHandle {
+	ResourceHandle() = default;
+	ResourceHandle(uint32_t handle) : mHandle(handle) {}
+
+	ResourceHandle& operator=(const ResourceHandle&) = default;
+
+	inline const bool IsValid() const { return mHandle != cInvalidHandle; }
+
+	uint32_t mHandle = 0;
+};

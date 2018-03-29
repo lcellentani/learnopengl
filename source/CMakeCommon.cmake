@@ -44,7 +44,7 @@ target_include_directories(${target}
 		"${PROJECT_SOURCE_DIR}/source/common"
 )
 target_link_libraries(${target}
-	examples-common
+	common
 	opengl32.lib
 	glfw3.lib
 )
