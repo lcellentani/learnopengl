@@ -17,4 +17,5 @@ void ShaderProgram_Destroy(const ShaderProgramHandle& handle);
 
 void ShaderProgram_Use(const ShaderProgramHandle& handle);
 
+void ShaderProgram_SetInt(const ShaderProgramHandle& handle, const char* name, int data);
 void ShaderProgram_SetFloat(const ShaderProgramHandle& handle, const char* name, float data);

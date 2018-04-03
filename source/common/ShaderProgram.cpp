@@ -1,7 +1,6 @@
 #include "ShaderProgram.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "GLApi.h"
 #include <array>
 #include <vector>
 
@@ -14,7 +13,7 @@ bool CheckShaderDidCompile(uint32_t shader) {
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-		std::cout << "ERROR::SHADER_COMPILATION_ERROR\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+		Log(tinyngine::Logger::Error, "ERROR::SHADER_COMPILATION_ERROR %s", infoLog);
 		return false;
 	}
 	return true;
@@ -26,7 +25,7 @@ bool CheckProgramDidCompile(uint32_t program) {
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(program, 1024, NULL, infoLog);
-		std::cout << "ERROR::PROGRAM_LINKING_ERROR\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+		Log(tinyngine::Logger::Error, "ERROR::PROGRAM_LINKING_ERROR %s", infoLog);
 	}
 	return true;
 }
@@ -34,15 +33,19 @@ bool CheckProgramDidCompile(uint32_t program) {
 class ShaderProgram {
 public:
 	ShaderProgram() = default;
+	~ShaderProgram() {
+		Destroy();
+	}
 
 	void Create() {
 		mId = glCreateProgram();
+		GL_ERROR(mId == 0);
 		mAttachedShaders.reserve(4);
 	}
 
 	void Destroy() {
 		if (IsValid()) {
-			glDeleteProgram(mId);
+			GL_CHECK(glDeleteProgram(mId));
 			mId = 0;
 		}
 	}
@@ -50,21 +53,27 @@ public:
 	void AttachShader(uint32_t shaderType, const char* shaderCode) {
 		if (shaderCode && IsValid()) {
 			uint32_t shaderId = glCreateShader(shaderType);
-			glShaderSource(shaderId, 1, &shaderCode, NULL);
-			glCompileShader(shaderId);
+			GL_ERROR(shaderId == 0);
+			GL_CHECK(glShaderSource(shaderId, 1, &shaderCode, NULL));
+			GL_CHECK(glCompileShader(shaderId));
 			if (CheckShaderDidCompile(shaderId)) {
-				glAttachShader(mId, shaderId);
+				GL_CHECK(glAttachShader(mId, shaderId));
 				mAttachedShaders.push_back(shaderId);
+			} else {
+				Destroy();
 			}
 		}
 	}
 
 	void Link() {
 		if (IsValid()) {
-			glLinkProgram(mId);
-			CheckProgramDidCompile(mId);
-			for (auto shaderId : mAttachedShaders) {
-				glDeleteShader(shaderId);
+			GL_CHECK(glLinkProgram(mId));
+			if (CheckProgramDidCompile(mId)) {
+				for (auto shaderId : mAttachedShaders) {
+					GL_CHECK(glDeleteShader(shaderId));
+				}
+			} else {
+				Destroy();
 			}
 			mAttachedShaders.clear();
 		}
@@ -72,21 +81,33 @@ public:
 
 	void Use() {
 		if (IsValid()) {
-			glUseProgram(mId);
+			GL_CHECK(glUseProgram(mId));
 		}
 	}
 
-	void SetUniformFloat(const char* name, float data) {
-		if (IsValid()) {
-			glUniform1f(glGetUniformLocation(mId, name), data);
+	void SetUniformInt(const char* name, GLint data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform1i(location, data));
 		}
 	}
 
-	bool IsValid() const { return mId > 0; }
+	void SetUniformFloat(const char* name, GLfloat data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform1f(location, data));
+		}
+	}
+
+	bool IsValid() const {
+		return mId > 0;
+	}
 
 private:
-	uint32_t mId = 0;
-	std::vector<uint32_t> mAttachedShaders;
+	GLuint mId = 0;
+	std::vector<GLuint> mAttachedShaders;
 };
 
 static constexpr uint32_t cMaxShaderProgramHandles = (1 << 6);
@@ -94,7 +115,6 @@ uint32_t sProgramsCount = 0;
 std::array<ShaderProgram, cMaxShaderProgramHandles> sShaderPrograms;
 
 }
-
 
 ShaderProgramHandle ShaderProgram_Create(const ShaderProgramParams& params) {
 	if (params.mVertexShaderData.empty()) {
@@ -133,6 +153,14 @@ void ShaderProgram_Use(const ShaderProgramHandle& handle) {
 	}
 	auto& program = sShaderPrograms[handle.mHandle];
 	program.Use();
+}
+
+void ShaderProgram_SetInt(const ShaderProgramHandle & handle, const char * name, int data) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformInt(name, data);
 }
 
 void ShaderProgram_SetFloat(const ShaderProgramHandle& handle, const char* name, float data) {

@@ -1,5 +1,6 @@
 #include "CommonDefine.h"
-#include "GraphicsTypes.h"
+#include "GLApi.h"
+#include "Log.h"
 
 #define USE_DRAWELEMENT 1
 
@@ -45,7 +46,7 @@ int main() {
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
+		Log(tinyngine::Logger::Error, "Failed to create GLFW window");
 		glfwTerminate();
 		return 1;
 	}
@@ -53,7 +54,7 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		Log(tinyngine::Logger::Error, "Failed to initialize GLAD");
 		return 1;
 	}
 
@@ -66,7 +67,7 @@ int main() {
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+		Log(tinyngine::Logger::Error, "ERROR::SHADER::VERTEX::COMPILATION_FAILED %s", infoLog);
 	}
 	// fragment shader
 	int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -75,7 +76,7 @@ int main() {
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+		Log(tinyngine::Logger::Error, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED %s", infoLog);
 	}
 	int shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
@@ -84,7 +85,7 @@ int main() {
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		Log(tinyngine::Logger::Error, "ERROR::SHADER::PROGRAM::LINKING_FAILED %s", infoLog);
 	}
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
@@ -146,8 +147,6 @@ int main() {
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 #endif
