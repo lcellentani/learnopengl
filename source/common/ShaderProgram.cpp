@@ -101,6 +101,78 @@ public:
 		}
 	}
 
+	void SetUniformVec2f(const char* name, GLfloat f0, GLfloat f1) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform2f(location, f0, f1));
+		}
+	}
+
+	void SetUniformVec3f(const char* name, GLfloat f0, GLfloat f1, GLfloat f2) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform3f(location, f0, f1, f2));
+		}
+	}
+
+	void SetUniformVec4f(const char* name, GLfloat f0, GLfloat f1, GLfloat f2, GLfloat f3) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform4f(location, f0, f1, f2, f3));
+		}
+	}
+
+	void SetUniformVec2v(const char* name, const GLfloat* data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform2fv(location, 1, data));
+		}
+	}
+
+	void SetUniformVec3v(const char* name, const GLfloat* data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform3fv(location, 1, data));
+		}
+	}
+
+	void SetUniformVec4v(const char* name, const GLfloat* data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniform4fv(location, 1, data));
+		}
+	}
+
+	void SetUniformMat2v(const char* name, const GLfloat* data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniformMatrix2fv(location, 1, GL_FALSE, data));
+		}
+	}
+
+	void SetUniformMat3v(const char* name, const GLfloat* data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniformMatrix3fv(location, 1, GL_FALSE, data));
+		}
+	}
+
+	void SetUniformMat4v(const char* name, const GLfloat* data) {
+		if (IsValid() && name) {
+			int32_t location = glGetUniformLocation(mId, name);
+			GL_ERROR(location == -1);
+			GL_CHECK(glUniformMatrix4fv(location, 1, GL_FALSE, data));
+		}
+	}
+
 	bool IsValid() const {
 		return mId > 0;
 	}
@@ -169,4 +241,76 @@ void ShaderProgram_SetFloat(const ShaderProgramHandle& handle, const char* name,
 	}
 	auto& program = sShaderPrograms[handle.mHandle];
 	program.SetUniformFloat(name, data);
+}
+void ShaderProgram_SetVec3(const ShaderProgramHandle& handle, const char* name, float f0, float f1, float f2) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformVec3f(name, f0, f1, f2);
+}
+
+void ShaderProgram_SetVec2(const ShaderProgramHandle& handle, const char* name, float f0, float f1) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformVec2f(name, f0, f1);
+}
+
+void ShaderProgram_SetVec3(const ShaderProgramHandle& handle, const char* name, float f0, float f1, float f2, float f3) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformVec4f(name, f0, f1, f2, f3);
+}
+
+void ShaderProgram_SetVec2(const ShaderProgramHandle& handle, const char* name, const glm::vec2& data) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformVec2v(name, &data[0]);
+}
+
+void ShaderProgram_SetVec3(const ShaderProgramHandle& handle, const char* name, const glm::vec3& data) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformVec3v(name, &data[0]);
+}
+
+void ShaderProgram_SetVec4(const ShaderProgramHandle& handle, const char* name, const glm::vec4& data) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformVec4v(name, &data[0]);
+}
+
+void ShaderProgram_SetMat2(const ShaderProgramHandle & handle, const char * name, const glm::mat2& data) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformMat2v(name, &data[0][0]);
+}
+
+void ShaderProgram_SetMat3(const ShaderProgramHandle & handle, const char * name, const glm::mat3& data) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformMat3v(name, &data[0][0]);
+}
+
+
+void ShaderProgram_SetMat4(const ShaderProgramHandle & handle, const char * name, const glm::mat4& data) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformMat4v(name, &data[0][0]);
 }

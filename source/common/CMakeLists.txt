@@ -8,11 +8,13 @@ endif()
 add_library(common
 	${EXAMPLES_COMMON_ALL_INCLUDES}
 	${PROJECT_SOURCE_DIR}/3rdparty/glad/src/glad.c
+	Camera.cpp
 	GLApi.cpp
 	Log.cpp
 	ShaderProgram.cpp
 	StringUtils.cpp
 	Texture.cpp
+	TransformHelper.cpp
 )
 
 if(MSVC)
