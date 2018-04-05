@@ -11,11 +11,11 @@
 namespace
 {
 
-float slastX = 0;
-float sLastY = 0;
-bool sFirstMouse = true;
+float gLastX = 0;
+float gLastY = 0;
+bool gFirstMouse = true;
 
-Camera sCamera;
+Camera gCamera;
 
 }
 
@@ -25,16 +25,16 @@ void processInput(GLFWwindow *window, float deltaTime) {
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		sCamera.ProcessKeyboard(Camera::Move::Forward, deltaTime);
+		gCamera.ProcessKeyboard(Camera::Move::Forward, deltaTime);
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		sCamera.ProcessKeyboard(Camera::Move::Backward, deltaTime);
+		gCamera.ProcessKeyboard(Camera::Move::Backward, deltaTime);
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		sCamera.ProcessKeyboard(Camera::Move::Left, deltaTime);
+		gCamera.ProcessKeyboard(Camera::Move::Left, deltaTime);
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		sCamera.ProcessKeyboard(Camera::Move::Right, deltaTime);
+		gCamera.ProcessKeyboard(Camera::Move::Right, deltaTime);
 	}
 }
 
@@ -45,24 +45,24 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 void mouse_callback(GLFWwindow* window, double posX, double posY) {
 	TINYNGINE_UNUSED(window);
-	if (sFirstMouse) {
-		slastX = float(posX);
-		sLastY = float(posY);
-		sFirstMouse = false;
+	if (gFirstMouse) {
+		gLastX = float(posX);
+		gLastY = float(posY);
+		gFirstMouse = false;
 	}
 
-	float xOffset = float(posX) - slastX;
-	float yOffset = sLastY - float(posY);
+	float xOffset = float(posX) - gLastX;
+	float yOffset = gLastY - float(posY);
 
-	slastX = float(posX);
-	sLastY = float(posY);
+	gLastX = float(posX);
+	gLastY = float(posY);
 
-	sCamera.ProcessMouse(xOffset, yOffset);
+	gCamera.ProcessMouse(xOffset, yOffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
 	TINYNGINE_UNUSED(window); TINYNGINE_UNUSED(xOffset);
-	sCamera.ProcessMouseScroll(float(yOffset));
+	gCamera.ProcessMouseScroll(float(yOffset));
 }
 
 int main() {
@@ -181,7 +181,7 @@ int main() {
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
-	sCamera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+	gCamera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
 	glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
 	float lastFrameTime = 0.0f;
@@ -189,38 +189,46 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 
+	glm::mat4 model;
+	glm::mat4 modelView;
+	glm::mat4 modelViewProj;
+	glm::mat4 projection = glm::perspective(glm::radians(gCamera.GetFOV()), aspectRation, 0.1f, 100.0f);
+
 	while (!glfwWindowShouldClose(window)) {
 		float currentFrameTime = float(glfwGetTime());
 		float deltaTime = currentFrameTime - lastFrameTime;
 		lastFrameTime = currentFrameTime;
 
-		glm::mat4 projection = glm::perspective(glm::radians(sCamera.GetFOV()), aspectRation, 0.1f, 100.0f);
-		glm::mat4 view = sCamera.GetViewMatrix();
+		glm::mat4 view = gCamera.GetViewMatrix();
+		
+		lightPosition.x = 1.0f + sin(currentFrameTime) * 2.0f;
+		lightPosition.y = sin(currentFrameTime / 2.0f) * 1.0f;
 
 		processInput(window, deltaTime);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		model = glm::mat4(1.0f);
+		modelView = view * model;
+		modelViewProj = projection * view * model;
 		ShaderProgram_Use(programHandle);
 		ShaderProgram_SetVec3(programHandle, "u_objectColor", 1.0f, 0.5f, 0.31f);
 		ShaderProgram_SetVec3(programHandle, "u_lightColor", 1.0f, 1.0f, 1.0f);
 		ShaderProgram_SetVec3(programHandle, "u_lightPosition", lightPosition);
-		ShaderProgram_SetMat4(programHandle, "u_projection", projection);
 		ShaderProgram_SetMat4(programHandle, "u_view", view);
-		glm::mat4 model(1.0f);
-		ShaderProgram_SetMat4(programHandle, "u_model", model);
+		ShaderProgram_SetMat4(programHandle, "u_viewModel", modelView);
+		ShaderProgram_SetMat4(programHandle, "u_modelViewProj", modelViewProj);
 
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		ShaderProgram_Use(lightProgramHandle);
-		ShaderProgram_SetMat4(lightProgramHandle, "u_projection", projection);
-		ShaderProgram_SetMat4(lightProgramHandle, "u_view", view);
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPosition);
 		model = glm::scale(model, glm::vec3(0.2f));
-		ShaderProgram_SetMat4(lightProgramHandle, "u_model", model);
+		modelViewProj = projection * view * model;
+		ShaderProgram_Use(lightProgramHandle);
+		ShaderProgram_SetMat4(lightProgramHandle, "u_modelViewProj", modelViewProj);
 
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

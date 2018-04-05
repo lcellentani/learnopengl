@@ -28,6 +28,7 @@ public:
 	void ProcessMouseScroll(float scrollOffset);
 
 	float GetFOV() const { return mFOV; }
+	glm::vec3 GetPosition() const { return mPosition; }
 
 private:
 	void Update();
