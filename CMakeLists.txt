@@ -29,9 +29,12 @@ add_subdirectory(source/00-hellotriangle)
 add_subdirectory(source/01-shaders)
 add_subdirectory(source/02-textures)
 add_subdirectory(source/03-basiclighting)
+add_subdirectory(source/04-materials)
+add_subdirectory(source/05-lightingmaps)
+add_subdirectory(source/06-lights)
 
 if (MSVC)
-	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT 03-basiclighting)
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT 04-materials)
 endif()
 
 #file(COPY ${PROJECT_SOURCE_DIR}/3rdparty/glfw/lib/x86/glfw3.dll DESTINATION ${CMAKE_BINARY_DIR})
