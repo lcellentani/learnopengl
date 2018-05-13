@@ -47,7 +47,7 @@ int main() {
 		return 1;
 	}
 
-	TextureHandle textureHandle1 = Texture_Create("container2.png", TextureFormats::RGB8);
+	TextureHandle textureHandle1 = Texture_Create("container.jpg", TextureFormats::RGB8);
 	if (!textureHandle1.IsValid()) {
 		Log(tinyngine::Logger::Error, "Failed to create texture");
 		return 1;
