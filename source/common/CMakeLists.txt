@@ -10,6 +10,7 @@ add_library(common
 	${PROJECT_SOURCE_DIR}/3rdparty/glad/src/glad.c
 	Camera.cpp
 	GLApi.cpp
+	InputManager.cpp
 	Log.cpp
 	ShaderProgram.cpp
 	StringUtils.cpp

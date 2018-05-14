@@ -242,13 +242,6 @@ void ShaderProgram_SetFloat(const ShaderProgramHandle& handle, const char* name,
 	auto& program = sShaderPrograms[handle.mHandle];
 	program.SetUniformFloat(name, data);
 }
-void ShaderProgram_SetVec3(const ShaderProgramHandle& handle, const char* name, float f0, float f1, float f2) {
-	if (!handle.IsValid()) {
-		return;
-	}
-	auto& program = sShaderPrograms[handle.mHandle];
-	program.SetUniformVec3f(name, f0, f1, f2);
-}
 
 void ShaderProgram_SetVec2(const ShaderProgramHandle& handle, const char* name, float f0, float f1) {
 	if (!handle.IsValid()) {
@@ -258,7 +251,15 @@ void ShaderProgram_SetVec2(const ShaderProgramHandle& handle, const char* name, 
 	program.SetUniformVec2f(name, f0, f1);
 }
 
-void ShaderProgram_SetVec3(const ShaderProgramHandle& handle, const char* name, float f0, float f1, float f2, float f3) {
+void ShaderProgram_SetVec3(const ShaderProgramHandle& handle, const char* name, float f0, float f1, float f2) {
+	if (!handle.IsValid()) {
+		return;
+	}
+	auto& program = sShaderPrograms[handle.mHandle];
+	program.SetUniformVec3f(name, f0, f1, f2);
+}
+
+void ShaderProgram_SetVec4(const ShaderProgramHandle& handle, const char* name, float f0, float f1, float f2, float f3) {
 	if (!handle.IsValid()) {
 		return;
 	}

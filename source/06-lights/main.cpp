@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "StringUtils.h"
 #include "Camera.h"
+#include "InputManager.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -14,6 +15,7 @@ namespace
 float gLastX = 0;
 float gLastY = 0;
 bool gFirstMouse = true;
+bool gUseDirectional = true;
 
 Camera gCamera;
 
@@ -65,6 +67,16 @@ void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
 	gCamera.ProcessMouseScroll(float(yOffset));
 }
 
+void UseDirectionalLight() {
+	Log(tinyngine::Logger::Information, "SELECT LIGHT TYPE: DIRECTIONAL");
+	gUseDirectional = true;
+}
+
+void UsePointLight() {
+	Log(tinyngine::Logger::Information, "SELECT LIGHT TYPE: POINT");
+	gUseDirectional = false;
+}
+
 int main() {
 	const uint32_t cScreenWidth = 800;
 	const uint32_t cScreenHeight = 600;
@@ -91,11 +103,15 @@ int main() {
 	// tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	Input_Initialize(window);
+	Input_BindKeyEvent(KeyEventType::Press, GLFW_KEY_1, UseDirectionalLight);
+	Input_BindKeyEvent(KeyEventType::Press, GLFW_KEY_2, UsePointLight);
+
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		Log(tinyngine::Logger::Error, "Failed to initialize GLAD");
 		return 1;
 	}
-	
+
 	ShaderProgramParams params;
 	StringUtils::ReadFileToString("06-lights.vs", params.mVertexShaderData);
 	StringUtils::ReadFileToString("06-lights.fs", params.mFragmentShaderData);
@@ -210,7 +226,8 @@ int main() {
 
 	gCamera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
-	glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
+	glm::vec4 lightPosition(1.2f, 1.0f, 2.0f, 1.0f);
+	glm::vec4 lightDirection(-0.2f, -1.0f, -0.3f, 0.0);
 	float lastFrameTime = 0.0f;
 	float aspectRation = float(cScreenWidth) / float(cScreenHeight);
 
@@ -228,9 +245,6 @@ int main() {
 
 		glm::mat4 view = gCamera.GetViewMatrix();
 		
-		lightPosition.x = 1.0f + sin(currentFrameTime) * 2.0f;
-		lightPosition.y = sin(currentFrameTime / 2.0f) * 1.0f;
-
 		processInput(window, deltaTime);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -240,14 +254,18 @@ int main() {
 		Texture_Bind(textureHandle2, 1);
 
 		ShaderProgram_Use(programHandle);
-		ShaderProgram_Use(programHandle);
 		ShaderProgram_SetInt(programHandle, "u_material.diffuse", 0);
 		ShaderProgram_SetInt(programHandle, "u_material.specular", 1);
 		ShaderProgram_SetFloat(programHandle, "u_material.shininess", 32.0f);
-		ShaderProgram_SetVec3(programHandle, "u_light.position", lightPosition);
+		
+		ShaderProgram_SetVec4(programHandle, "u_light.direction", (gUseDirectional ? lightDirection : lightPosition));
 		ShaderProgram_SetVec3(programHandle, "u_light.ambient", 0.01f, 0.01f, 0.01f);
 		ShaderProgram_SetVec3(programHandle, "u_light.diffuse", 1.0f, 1.0f, 0.8f);
 		ShaderProgram_SetVec3(programHandle, "u_light.specular", 1.0f, 1.0f, 1.0f);
+		ShaderProgram_SetFloat(programHandle, "u_light.constant", 1.0f);
+		ShaderProgram_SetFloat(programHandle, "u_light.linear", 0.09f);
+		ShaderProgram_SetFloat(programHandle, "u_light.quadratic", 0.032f);
+		
 		ShaderProgram_SetVec3(programHandle, "u_viewPosition", gCamera.GetPosition());
 
 		glBindVertexArray(cubeVAO);
@@ -266,7 +284,7 @@ int main() {
 		}
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPosition);
+		model = glm::translate(model, glm::vec3(lightPosition.x, lightPosition.y, lightPosition.z));
 		model = glm::scale(model, glm::vec3(0.2f));
 		modelViewProj = projection * view * model;
 		ShaderProgram_Use(lightProgramHandle);
